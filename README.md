@@ -28,17 +28,14 @@ Create the following before using this module:
 
 ## Getting Started
 
-Several fully-functional examples are provided in the `examples` directory. 
+Several functional examples are provided in the `examples` directory. 
 
-To get started quickly, for the minimum deployment, you can use the following example, adding the values on .tfvars files and main.tf:
+The following scenarios are covered in the examples:
+* Simple: Provisioning a single instance attached to an existing subnet 
+* Simple - Multiple VNICs : Provisions two instances in 2 separate new subnets.
+* Simple - autovars and bootstrap : Provisioning 2 instances in two different existing Subnets with remote_exec options.
 
-```
-$ terraform init
-$ terraform plan
-$ terraform apply
-```
-
-This will deploy a Compute Instance using the module defaults (see below for details).
+This module supports any combination of these scenarios.
 
 ## Accessing the Solution
 
@@ -46,42 +43,69 @@ This is a core service module: you can access the instances using a private key 
 
 You may continue to manage the deployed environment using Terraform (best), the OCI CLI, the OCI console (UI), directly via the API, etc.
 
-## Resource-specific inputs
+## Module inputs
+
+## Provider 
+
+The following IAM attributes are available in the the `terraform.tfvars` file:
+
+```
+### PRIMARY TENANCY DETAILS
+
+# Get this from the bottom of the OCI screen (after logging in, after Tenancy ID: heading)
+primary_tenancy_id="<tenancy OCID"
+# Get this from OCI > Identity > Users (for your user account)
+primary_user_id="<user OCID>"
+
+# the fingerprint can be gathered from your user account (OCI > Identity > Users > click your username > API Keys fingerprint (select it, copy it and paste it below))
+primary_fingerprint="<PEM key fingerprint>"
+# this is the full path on your local system to the private key used for the API key pair
+primary_private_key_path="<path to the private key that matches the fingerprint above>"
+
+# region (us-phoenix-1, ca-toronto-1, etc)
+primary_region="<your region>"
+
+### DR TENANCY DETAILS
+
+# Get this from the bottom of the OCI screen (after logging in, after Tenancy ID: heading)
+dr_tenancy_id="<tenancy OCID"
+# Get this from OCI > Identity > Users (for your user account)
+dr_user_id="<user OCID>"
+
+# the fingerprint can be gathered from your user account (OCI > Identity > Users > click your username > API Keys fingerprint (select it, copy it and paste it below))
+dr_fingerprint="<PEM key fingerprint>"
+# this is the full path on your local system to the private key used for the API key pair
+dr_private_key_path="<path to the private key that matches the fingerprint above>"
+
+# region (us-phoenix-1, ca-toronto-1, etc)
+dr_region="<your region>"
+```
 
 ### Compute Instance
 
 | Attribute | Data Type | Required | Default Value | Valid Values | Description |
 |---|---|---|---|---|---|
-| default\_compartment\_id | string | yes | none | string of the compartment OCID | This is the default OCID that will be used when creating objects (unless overridden for any specific object). This needs to be the OCID of a pre-existing compartment (it will not create the compartment).  |
+| default\_compartment\_id | string | yes | none | string of the compartment OCID | Default OCID that will be used when creating objects. Can be overridden in any specific Compute Instance definition. OCI comportament must exist.   |
 | ad | number | yes |  If null, first AD of the region | Availability Domains | Availability Domains of a Region. |
-| compartment_ocid | string | yes | none | Compartments available for the user| Unique identifier (OCID) of the compartment in which the Compute Instance is created. |
-| shape | string | yes | none | Shapes available | The instance shape. |
-| is_monitoring_disabled | bool | no |  false | boolean | Specifies whether the agent can gather performance metrics and monitor the instance. |
+| compartment_ocid | string | yes | none | Compartments available for the user| OCID of the compartment that the Compute Instance is created in |
 | subnet_id |string | yes | none | Subnet created | The subnets in which the instance primary VNICs are created. |
 | assign_public_ip | string | no | none | boolean | Specifies whether the VNIC should be assigned a public IP address. |
 | vnic_defined_tags |  map | no | none| none | Defined Tag. |
 | vnic_display_name | string| no | none | none | A user-friendly name for the VNIC. |
 | vnic_freeform_tags | map | no | none | none | Free form tag for the VNIC. |
-| private_ip | string | no | no | An ip not used within CIDR| Private IP addresses of your choice to assign to the VNICs. |
 | skip_source_dest_check | boolean | no | none | boolean value | Specifies whether the source/destination check is disabled on the VNIC. |
 | defined_tags | map | no | none | Defined tags | Defined tag for Instance. |
-| display_name | string | no | none | Any string | Display name of the compute instance. This parameter is the Key of the Map of instances; in the example below, "Display Name" = inst1. |
-| extended_metadata | map | no | none | valid JSON string | Additional metadata key/value pairs provided by the user. |
+| display_name | string | no | none | Any string | Display name of the compute instance. This parameter is the Key of the Map of the instances; in the example below, "Display Name" = inst-simple. |
 | fault_domain | string | no | none | valid Fault Domain in an AD | A fault domain is a grouping of hardware and infrastructure within an availability domain. |
 | vnic_freeform_tags | map | no | none | none | Free form tag for the Instance. |
-| hostname_label | string | no | none | Valid string | The hostname for the VNIC's primary private IP. |
-| ipxe_script | string | no | none | Valid script | The iPXE script which initiates the boot process on the compute instance. |
 | pv_encr_trans_enabled | bool | none | false | Boolean value | Enables in-transit encryption for the boot volume's paravirtualized attachment. |
-| ssh_authorized_keys | list | no | none | A valid public key |	Specify the path to the public SSH keys in the ~/.ssh/authorized_keys file for the default user on the instance. |
-| ssh_private_keys | list | no | none | A valid private key | Required parameter when a Block Volume is informed. Specify a path to the private SSH keys in the ~/.ssh/authorized_keys file for the default user on the instance. |
-| user_data | string | no | none | Valid commands | User-defined base64-encoded data to be used by Cloud-Init to run custom scripts, or provide a custom Cloud-Init configuration. |
+| ssh_authorized_keys | list | no | none | Path to ssh key |	A valid list of SSH Public key paths |
+| ssh_private_keys | list | no | none | A valid private key | Path to private SSH key use to remote_exec into the instance to execute commands |
 | image_name | string |yes | none | Valid image Name | The instance image name. Required parameter: an image_name or source_id is required to get an image to launch the instance. |
-| source_id | string |yes | none | Valid image OCID | The instance image OCID. Required parameter: an image_name or source_id is required to get an image to launch the instance. |
-| source_type | string | yes | none | image / bootVolume | The source type for the instance. |
+| source_id | string |yes | none | Valid image OCID | The instance image OCID. an image_name or source_id is required to get an image to launch the instance. |
 | boot_vol_size_gbs | number | no | none | >50GB | The size of the boot volume in GB. |
-| kms_key_id | string | no | none | none | (Applicable when source_type=image.) The OCID of the KMS key to be used as the master encryption key for the boot volume. |
 | preserve_boot_volume | boolean | no | false | Boolean values | Specifies whether to delete or preserve the boot volume when the instance is terminated. |
-| instance_timeout | string | no | 25m | Minutes | Timeout setting for creating an instance. (Note: large instance types may need larger timeout than the default 25m.) |
+| instance_timeout | string | no | 25m | Minutes | Timeout setting for creating an instance. (Note: large instance types may need a larger timeout) |
 |||||||
 | sec_vnic | map | no | none | Secondary VNIC info | Map. (List of secondary VNICs you want to attach to the instance.) |
 |||||||
@@ -92,13 +116,13 @@ You may continue to manage the deployed environment using Terraform (best), the 
 | freeform_tags | map | no | none | no | Free-form tags for this resource. Each tag is a simple key-value pair with no predefined name, type, or namespace. |
 | hostname_label | string | no | none | no | The hostname for the VNIC's primary private IP. Used for DNS. |
 | nsg_ids | list(string) | no | none | Valid NSGs| A list of the OCIDs of the network security groups (NSGs) to add the VNIC to. |
-| private_ip | string | no | none | Valid private IP within CIDR | A private IP address of your choice to assign to the VNIC. Must be an available IP address within the subnet's CIDR. |
+| private_ip | string | no | none | Valid private IP within CIDR | A private IP address of your choice to assign to the VNIC. Must be within the subnet's CIDR. |
 | skip_src_dest_check | bool | no | false | Boolean value | Specifies whether the source/destination check is disabled on the VNIC. |
 | instance_id | string | no | no | Instance OCID | The OCID of the instance. |
-| display_name | string | no | none | none | A user-friendly name for the attachment. Does not have to be unique, and it cannot be changed. |
-| nic_index | number | no | none | 0 | Which physical network interface card (NIC) the VNIC will use. |
+| display_name | string | no | none | none | A user-friendly name for the attachment. Does not have to be unique. It cannot be changed. |
+| nic_index | number | no | none | 0 | Network interface card (NIC) the VNIC will attached. |
 |||||||
-| mount_blk_vols | boolean | no | false | boolean | If true, mount block volumes informed. |
+| mount_blk_vols | boolean | no | false | boolean | If true, mount block volumes listed in block_volumes options. |
 | block_volumes | list | no | none | none | A list of Block Volumes OCID created that will be attached to the Instance. |
 | volume_id | string | no | none | none | Volume OCID. |
 | attachment_type | string | no | none | none | Type of Volume Attachment. |
@@ -112,7 +136,7 @@ You may continue to manage the deployed environment using Terraform (best), the 
 
 ***Example***
 
-The following  example creates a compute within a subnet and compartment specified, using a display name of "Simple Instance", with shape *`VM.Standard2.1`*. 
+The following example deploys a compute instance within a specified *subnet* and *compartment*. 
 
 
 ```
@@ -128,10 +152,10 @@ The following  example creates a compute within a subnet and compartment specifi
 locals {
   instances = {
         inst-simple = {
-            ad                          = null                                                                                  #0-AD1, 1-AD2, 3-AD3 RequiredRequired
+            ad                          = null #0-AD1, 1-AD2, 3-AD3 Required
             compartment_id              = var.default_compartment_id #Required
             shape                       = "VM.Standard2.1"                                                                      #Required
-            subnet_id                   = "ocid1.xxxxx"
+            subnet_id                   = "<Replace with existing Subnet's OCID>"
             
             is_monitoring_disabled      = null
             
@@ -156,8 +180,8 @@ locals {
             user_data                   = null #base64encode(file("bootstrap.sh"))
 
             // See https://docs.cloud.oracle.com/iaas/images/
-            // Oracle-provided image "Oracle-Linux-7.6-2019.06.15-0"
-            image_name                  = "Oracle-Linux-7.6-2019.06.15-0"  #Required
+            // Oracle-provided image "Oracle-Linux-7.7-2019.06.15-0"
+            image_name                  = "Oracle-Linux-7.7-2019.06.15-0"  #Required
             source_id                   = null #"ocid1.image.oc1.eu-frankfurt-1.xxxxxx" #"ocid1.image.oc1.iad.xxxx"  #Required
             source_type                 = null
             boot_vol_size_gbs           = null
@@ -199,13 +223,14 @@ This module returns 1 object :
 
 ## Notes/Issues
 
-* Note for regions where you don't have multiple ADs, you can leave as null or inform correct AD.
-* Note for Image: you can choose "image_name" or "source_id" to inform the image you will use to launch the instance. If you provide both source_id will be used. Image Names provide by OCI are updated often. Make sure you provided an existing image name for the DataCenter the instance will be deployed on. 
-* Note Mount Block Volume: the mount is performed only for Oracle Linux OS. At least one private key "ssh_private_keys" is required, when mounting a block volume and a public IP available to the instance and accessible from the internet. There is a limit for # of block volumes of 20, if you need more, please add the partitions in the list (go to main.tf file; dev_partitions  = ["sdb",...,"sdz"])
-* If you change certain parameters, TF will try to delete and create, however it doesn't work properly always... when you see errors like the below, use `terraform destroy`, then `terraform apply` (instead of relying on `terraform apply` to handle things correctly).
+* Regions with single ADs, AD property can be set to null.
+* If image_name and source_id are set, source_id will take precedence. Image Names provide by OCI are updated often. Value provided as Image Name must match current Oracle Provided Image names
+* Mounting a block volumes is only available for Oracle Linux OS. At least one private key "ssh_private_keys" is required when mounting a block volume and a public IP available to the instance to be accessible from the internet. 
 
 
 ## URLs
+
+For Oracle Cloud Infrastructure documentation, see 
 
 * [https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm](https://docs.cloud.oracle.com/iaas/Content/Compute/Concepts/computeoverview.htm)
 * [https://docs.cloud.oracle.com/iaas/Content/Compute/References/bestpracticescompute.htm#two](https://docs.cloud.oracle.com/iaas/Content/Compute/References/bestpracticescompute.htm#two)
