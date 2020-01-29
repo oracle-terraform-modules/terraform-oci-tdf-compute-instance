@@ -1,4 +1,4 @@
-# Oracle Cloud Infrastructure Compute Instance Terraform Module
+# Oracle Cloud Infrastructure Compute Instance Module for Terraform
 
 ## Introduction
 
