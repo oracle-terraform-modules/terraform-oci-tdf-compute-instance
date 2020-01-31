@@ -19,7 +19,7 @@ This example is intended to the following OCI topology:
 ## Pre-Requisites
 
 * Subnet OCID - Update `main.tf` file and set the corresponding Subnet OCID on each Compute Instance
-* Set of SSH Keys - Update `main.tf` file and set SSH Keys Path on each Compute Instance
+* Set of SSH Keys - Update `main.tf` file and set SSH Keys Path **`ssh_authorized_keys`** on each Compute Instance
 
 ## Using this example
 Prepare one variable file named `terraform.tfvars` with the required information (or feel free to copy the contents from `terraform.tfvars.template`).  The contents of `terraform.tfvars` should look something like the following:

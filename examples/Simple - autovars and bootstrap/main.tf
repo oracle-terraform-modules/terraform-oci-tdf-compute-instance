@@ -5,8 +5,8 @@
 locals {
   comp_instances = {
           inst1-Python = {
-              ad                           = null                                                                                  #0-AD1, 1-AD2, 3-AD3 Required
-              compartment_id              = "ocid1.xxxxx" #Required
+              ad                          = null                                                                                  #0-AD1, 1-AD2, 3-AD3 Required
+              compartment_id              = null #"ocid1.xxxxx" #Optional if var.default_compartment_id set
               shape                       = "VM.Standard2.1"                                                                      #Required
               subnet_id                   = "ocid1.xxxxx"   #Required
 
@@ -37,8 +37,7 @@ locals {
               // See https://docs.cloud.oracle.com/iaas/images/
               // Oracle-provided image "Oracle-Linux-7.7-2019.10.19-0"
               image_name             = "Oracle-Linux-7.7-2019.10.19-0" #Required
-              mkp_image_name              = null
-              source_id                   = "ocid1.xxxxx"  #Required
+              source_id                   = null #"ocid1.xxxxx"  #Required
               source_type                 = null
               boot_vol_size_gbs           = null
               kms_key_id                  = null
@@ -51,10 +50,12 @@ locals {
               cons_conn_create            = null
               cons_conn_def_tags          = null
               cons_conn_free_tags         = null
+              mkp_image_name              = null
+              mkp_image_name_version      = null
           }, 
           "inst2-Apache" = {
               ad                           = 0                                                                                     #0-AD1, 1-AD2, 3-AD3 Required
-              compartment_id              = "ocid1.xxxxx" #Required
+              compartment_id              = null #"ocid1.xxxxx" #Optional if var.default_compartment_id set
               shape                       = "VM.Standard2.1"                                                                      #Required
 
               is_monitoring_disabled      = null
@@ -64,7 +65,7 @@ locals {
               vnic_defined_tags           = null
               vnic_display_name           = "VNICName"
               vnic_freeform_tags          = null
-              nsg_ids                     = ["ocid1.xxxxx"]
+              nsg_ids                     = null # ["ocid1.xxxxx"] Required to access
               private_ip                  = null  #"10.0.3.8"
               skip_src_dest_check               = null
 

@@ -238,12 +238,13 @@ For Oracle Cloud Infrastructure documentation, see
 
 ## Versions
 
-This module has been developed and tested by running terraform on macOS Mojave Version 10.14.5
+This module has been developed and tested by running terraform on Oracle Linux Server release 7.7 
 
 ```
-user-mac$ terraform --version
-Terraform v0.12.3
-+ provider.oci v3.31.0
+user-linux$ terraform --version
+Terraform v0.12.19
++ provider.oci v3.58.0
+
 ```
 
 ## Contributing
@@ -252,8 +253,8 @@ This project is open source. Oracle appreciates any contributions that are made 
 
 ## License
 
-Copyright (c) 2020 Oracle and/or its affiliates. All rights reserved.
+Copyright (c) 2020 Oracle and/or its affiliates.
 
-Licensed under the Universal Permissive License 1.0.
+Licensed under the Universal Permissive License v 1.0 as shown at https://oss.oracle.com/licenses/upl.
 
 See [LICENSE](LICENSE) for more details.
